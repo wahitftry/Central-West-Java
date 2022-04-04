@@ -1,13 +1,8 @@
 # Central-West-Java
 
----
-title: Discontinuing a project
-author: Alsheiraz
-script base: Beckzy Freeroam/Roleplay
-date: 2022-04-03
-last edit: 2022-03-14
-category: Stable Release
----
+Title | Author | Script Base | Date | Last Edit | Category 
+--- | --- | --- | --- |--- |--- 
+Central West Java | Alsheiraz | Beckzy Freeroam/Roleplay | 2022-04-03 | 2022-03-14 | Stable 
 
 **Overview of the different options for discontinuing a Alsheiraz open source project, this process is to
 be used for projects which no longer have active maintainers, or projects which Alsheiraz no longer have a motivation
