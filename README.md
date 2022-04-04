@@ -17,6 +17,6 @@ I decided to discontinue the development of this project to concentrate my effor
 - The open source guild can help you make the right choice
 
 
-**Contact the open-source guild (Alsheiraz or Beckzy) for guidance.**
+**Contact the open-source guild for guidance.**
 
 ---
