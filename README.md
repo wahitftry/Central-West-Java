@@ -13,7 +13,7 @@ to maintain, usually due to lack of internal use.**
 
 ### Summary
 
-I decided to discontinue the development of this project to concentrate my efforts on other projects.
+I decided to discontinue the development of this project to concentrate my efforts on my own real life or other projects.
 
 - Im obligated to gracefully discontinue projects, which i have no motivation to maintain anymore
 - Projects can be archived, users directed to a 3rd party fork, but the ownership of such project cant be transferred
