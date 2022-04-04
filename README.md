@@ -4,7 +4,7 @@ Title | Author | Script Base | Date | Last Edit | Category
 --- | --- | --- | --- |--- |--- 
 Central West Java | Alsheiraz | Beckzy Freeroam/Roleplay | 2022-04-03 | 2022-03-14 | Stable 
 
-**This process is to be used for projects which no longer have active maintainers, or projects which Alsheiraz no longer have a motivation
+**This README is to be used for projects which no longer have active maintainers, or projects which Alsheiraz no longer have a motivation
 to maintain, usually due to lack of internal use.**
 
 
