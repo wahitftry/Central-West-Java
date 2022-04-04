@@ -1,4 +1,7 @@
 # Central-West-Java
+<p align="center">
+<img src="https://user-images.githubusercontent.com/26300406/161512565-3c3969b9-256a-4907-a6c2-555bd56a31f4.png">
+</p>
 
 Title | Author | Script Base | Date | Last Edit | Category 
 --- | --- | --- | --- |--- |--- 
