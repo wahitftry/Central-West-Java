@@ -19,4 +19,8 @@ I decided to discontinue the development of this project to concentrate my effor
 
 **Contact the open-source guild for guidance.**
 
+## Disclaimer
+
+It is forbidden to change the ownership of this script and it is forbidden to change the ownership of the name Central West Java. The name Central West Java is still held by Eren and Alsheira.
+
 ---
