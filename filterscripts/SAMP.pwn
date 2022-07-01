@@ -2,6 +2,7 @@
 #include <discord-connector>
 
 new DCC_Channel:g_Discord_Chat;
+#define admsys_isnull(%0) ((!(%0[0])) || (((%0[0]) == '\1') && (!(%0[1]))))
 
 public OnFilterScriptInit()
 {
