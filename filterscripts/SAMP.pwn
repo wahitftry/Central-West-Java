@@ -5,7 +5,7 @@ new DCC_Channel:g_Discord_Chat;
 
 public OnFilterScriptInit()
 {
-	g_Discord_Chat = DCC_FindChannelById("729238185762095175"); // Discord channel ID
+	g_Discord_Chat = DCC_FindChannelById("729238185762095175"); 
     return 1;
 }
 
@@ -21,7 +21,7 @@ public DCC_OnMessageCreate(DCC_Message:message)
     new DCC_User:author;
 	DCC_GetMessageAuthor(message, author);
     DCC_IsUserBot(author, IsBot);
-    if(channel == g_Discord_Chat && !IsBot) //!IsBot will block BOT's message in game
+    if(channel == g_Discord_Chat && !IsBot)
     {
         new user_name[32 + 1], str[152];
        	DCC_GetUserName(author, user_name, 32);
@@ -54,7 +54,7 @@ public OnPlayerConnect(playerid)
     {Kick(playerid);}
     else {
     if (_:g_Discord_Chat == 0)
-    g_Discord_Chat = DCC_FindChannelById("729238185762095175"); // Discord channel ID
+    g_Discord_Chat = DCC_FindChannelById("729238185762095175");
 
     new string[128];
     format(string, sizeof string, " ```diff\n+ %s Joined The Server. :)\n```", name);
@@ -76,7 +76,7 @@ public OnPlayerDisconnect(playerid, reason)
     };
     
     if (_:g_Discord_Chat == 0)
-    g_Discord_Chat = DCC_FindChannelById("729238185762095175"); // Discord channel ID
+    g_Discord_Chat = DCC_FindChannelById("729238185762095175");
 
     new string[128];
     format(string, sizeof string, " ```diff\n- %s Has Left The Server (%s) :(\n```", name, szDisconnectReason[reason]);
