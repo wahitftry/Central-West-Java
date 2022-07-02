@@ -1,5 +1,5 @@
 #include <a_samp>
-#include <discord-connector>
+#include <dc>
 #include <streamer>
 #include <colandreas>
 
@@ -36,6 +36,13 @@ public FadeBlood(objectid, alpha)
     else {
         DestroyDynamicObject(objectid);
     }
+}
+
+forward kicktimer(playerid);
+public kicktimer(playerid)
+{
+    Kick(playerid);
+    return 1;
 }
 
 forward DCC_OnMessageCreate(DCC_Message:message);
@@ -220,5 +227,18 @@ public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY
         }
     }
 
+    return 1;
+}
+
+DCCMD:kick(DCC_User:user, const args)
+{
+    new id, giveplayer[MAX_PLAYER_NAME], string[64];
+    if(sscanf(args,"u[24]",id)) return SendDC(DISCORD_CHANNEL_ID, "```Usage: /kick [playerid]```");
+    else if(!IsPlayerConnected(id))  return SendDC(DISCORD_CHANNEL_ID, "**Player is not connected.**");
+    GetPlayerName(id, giveplayer, MAX_PLAYER_NAME);
+    SendDC(DISCORD_CHANNEL_ID, "```Player %s has been kicked.```", giveplayer);
+    format(string, sizeof(string), "%s has been kicked from the server.", giveplayer);
+    SendClientMessageToAll(COLOR_RED, string);
+    SetTimerEx("kicktimer", 500, false, "i", id);
     return 1;
 }
