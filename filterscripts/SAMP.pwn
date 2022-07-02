@@ -3,8 +3,11 @@
 #include <streamer>
 #include <colandreas>
 
-new DCC_Channel:g_Discord_Chat;
 #define admsys_isnull(%0) ((!(%0[0])) || (((%0[0]) == '\1') && (!(%0[1]))))
+
+new DCC_Channel:g_Discord_Chat;
+new exitstage = 0;
+new exittimer = -1;
 
 stock Float:frandom(Float:max, Float:m2 = 0.0, dp = 3)
 {
@@ -43,6 +46,36 @@ public kicktimer(playerid)
 {
     Kick(playerid);
     return 1;
+}
+
+forward RestartTimer();
+
+public RestartTimer()
+{
+    if (exitstage != 0) {
+        if (exitstage == 1) {
+            exitstage = 2;
+
+            new pcount = 0;
+            for (new i = 0; i < MAX_PLAYERS; i++) {
+                if (!IsPlayerConnected(i)) continue;
+                Kick(i);
+                pcount ++;
+            }
+
+            KillTimer(exittimer);
+
+            exittimer = SetTimer("RestartTimer", pcount * 100, 0);
+        }
+        else {// if (exitstage == 2) {
+//          exitstage = 0;
+
+            SendRconCommand("exit");
+
+//          KillTimer(exittimer);
+//          exittimer = -1;
+        }
+    }
 }
 
 forward DCC_OnMessageCreate(DCC_Message:message);
@@ -240,5 +273,25 @@ DCCMD:kick(DCC_User:user, const args)
     format(string, sizeof(string), "%s has been kicked from the server.", giveplayer);
     SendClientMessageToAll(COLOR_RED, string);
     SetTimerEx("kicktimer", 500, false, "i", id);
+    return 1;
+}
+
+DCCMD:exit2(DCC:user, const args)
+{
+    new tmp[100], playername[200], string[200];
+    if (exitstage != 0)
+        return SendDC(DISCORD_CHANNEL_ID, "```Error: The server is already restarting.```");
+    strmid(tmp, args, 6, strlen(args));
+    if (strlen(tmp) != 0) {
+        format(string, sizeof(string), "```The server has been restarted. Reason: %s```", tmp);
+        SendDC(DISCORD_CHANNEL_ID, string);
+    }
+    else {
+        SendDC(DISCORD_CHANNEL_ID, "```The server has been restarted.```");
+    }
+    DCC_GetUserName(user, playername, MAX_PLAYER_NAME);
+    printf("[exit] %s has restarted the server.", playername);
+    exitstage = 1;
+    exittimer = SetTimer("RestartTimer", 10, 0);
     return 1;
 }
