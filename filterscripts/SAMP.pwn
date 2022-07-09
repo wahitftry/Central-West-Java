@@ -295,3 +295,26 @@ DCCMD:exit2(DCC:user, const args)
     exittimer = SetTimer("RestartTimer", 10, 0);
     return 1;
 }
+DCCMD:freeze(DCC_User:user, const args)
+{
+	new giveplayerid, giveplayer[MAX_PLAYER_NAME];
+	if (sscanf(args, "u", giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "```Usage: /freeze [playerid]```");
+	if (!IsPlayerConnected(giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "**Error: Inactive player id!**");
+	TogglePlayerControllable(giveplayerid, 0);
+	GetPlayerName(giveplayerid, giveplayer, MAX_PLAYER_NAME);
+	SendClientMessage(giveplayerid, COLOR_RED, "You have been frozen by an admin.");
+	SendDC(DISCORD_CHANNEL_ID, "``` Player %s has been frozen.```", giveplayer);
+	return 1;
+}
+ 
+DCCMD:unfreeze(DCC_User:user, const args)
+{
+    new giveplayerid, giveplayer[MAX_PLAYER_NAME];
+	if (sscanf(args, "u", giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "```Usage: /unfreeze [playerid]```");
+	if (!IsPlayerConnected(giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "**Error: Inactive player id!**");
+    TogglePlayerControllable(giveplayerid, 1);
+    GetPlayerName(giveplayerid, giveplayer, MAX_PLAYER_NAME);
+	SendClientMessage(giveplayerid, COLOR_RED, "You have been unfrozen by an admin.");
+	SendDC(DISCORD_CHANNEL_ID, "``` Player %s has been unfrozen.```", giveplayer);
+	return 1;
+}
