@@ -318,3 +318,19 @@ DCCMD:unfreeze(DCC_User:user, const args)
 	SendDC(DISCORD_CHANNEL_ID, "``` Player %s has been unfrozen.```", giveplayer);
 	return 1;
 }
+DCCMD:players(DCC_User:user, const args)
+{
+    new count = 0;
+	new name[24], IP[50];
+	SendDC(DISCORD_CHANNEL_ID, "**__Online Players__**");
+	for(new i=0; i < MAX_PLAYERS; i++) {
+	if(!IsPlayerConnected(i)) continue;
+	GetPlayerName(i, name, MAX_PLAYER_NAME);
+    GetPlayerIp(i, IP, sizeof(IP));
+	{
+	   SendDC(DISCORD_CHANNEL_ID, "```%s(%d) %s %i```", name, i, IP, GetPlayerScore(i));
+	   count++; }
+	}
+	if (count == 0) return SendDC(DISCORD_CHANNEL_ID, "There are no players online.");
+	return 1;
+}
