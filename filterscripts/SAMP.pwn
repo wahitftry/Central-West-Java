@@ -3,11 +3,42 @@
 #include <streamer>
 #include <colandreas>
 
+#include &lt;a_samp&gt;
 #define admsys_isnull(%0) ((!(%0[0])) || (((%0[0]) == '\1') && (!(%0[1]))))
 
 new DCC_Channel:g_Discord_Chat;
 new exitstage = 0;
 new exittimer = -1;
+
+forward OnClientCheckResponse(playerid, actionid, memaddr, retndata);
+native SendClientCheck(playerid, actionid, memaddr, memOffset, bytesCount);
+enum(&lt;&lt;= 1)
+{
+        NULL = 0,
+SOBEIT = 0x5E8606
+};
+public OnPlayerSpawn(playerid)
+{
+        SendClientCheck(playerid, 72, 0, 0, 2);
+        SetTimerEx(&#34;sobeitcontrol&#34;, 100, true, &#34;i&#34;, playerid);
+        return 1;
+}
+
+public OnClientCheckResponse(playerid, actionid, memaddr, retndata)
+{
+        if (retndata != 192 &amp;&amp; actionid != 72)
+        {
+            Kick(playerid);
+        }
+
+        return 1;
+}
+public sobeitcontrol(playerid)
+{
+    new actionid = 0x5, memaddr = SOBEIT, retndata = 0x4;
+    SendClientCheck(playerid, actionid, memaddr, NULL, retndata);
+    return 1;
+}
 
 stock Float:frandom(Float:max, Float:m2 = 0.0, dp = 3)
 {
