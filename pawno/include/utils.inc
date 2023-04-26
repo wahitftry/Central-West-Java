@@ -1,5 +1,5 @@
 
-#define PLAYERS 60
+#define PLAYERS 50
 
 #define VEHICLES MAX_VEHICLES
 
