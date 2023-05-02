@@ -1,26 +1,32 @@
-# Central-West-Java
 <p align="center">
 <img src="https://user-images.githubusercontent.com/26300406/161512565-3c3969b9-256a-4907-a6c2-555bd56a31f4.png">
 </p>
 
-Title | Author | Script Base | Date | Last Edit | Category 
---- | --- | --- | --- |--- |--- 
-Central West Java | Alsheiraz | Beckzy Freeroam/Roleplay | 2022-04-03 | 2022-03-14 | Stable 
+# Central West Java Server SA-MP
 
-**This README is to be used for projects which no longer have active maintainers, or projects which Alsheiraz no longer have a motivation
-to maintain, usually due to lack of internal use.**
+Ini adalah repositori untuk Central West Java Server SA-MP. Repositori ini digunakan untuk pengembangan dan pemeliharaan server samp untuk Central West Java.
 
+## Penggunaan
 
-### Summary
+Untuk menggunakan server samp ini, Anda perlu mengikuti langkah-langkah berikut:
 
-I decided to discontinue the development of this project to concentrate my efforts on my own real life or other projects.
+1. Clone repositori ini ke dalam direktori lokal Anda.
+2. Pastikan Anda memiliki server samp yang terinstal di komputer Anda.
+3. Buka file `server.cfg` dan sesuaikan pengaturan sesuai dengan preferensi Anda.
+4. Jalankan server samp menggunakan file `samp-server.exe`.
 
-- Im obligated to gracefully discontinue projects, which i have no motivation to maintain anymore
-- Projects can be archived, users directed to a 3rd party fork, but the ownership of such project cant be transferred
-- The open source guild can help you make the right choice
+## Kontribusi
 
+Kami selalu terbuka untuk kontribusi dari pengguna lain. Jika Anda ingin berkontribusi pada repositori ini, silakan ikuti langkah-langkah berikut:
 
-**Contact the open-source guild for guidance.**
+1. Fork repositori ini ke dalam akun Github Anda.
+2. Buat branch baru untuk fitur atau perbaikan yang ingin Anda tambahkan.
+3. Lakukan perubahan atau penambahan yang diperlukan.
+4. Buat pull request ke repositori utama.
+
+## Lisensi
+
+Repositori ini dilisensikan di bawah lisensi [MIT](https://opensource.org/licenses/MIT). Silakan merujuk ke file `LICENSE` untuk informasi lebih lanjut tentang lisensi ini.
 
 ## Disclaimer
 
