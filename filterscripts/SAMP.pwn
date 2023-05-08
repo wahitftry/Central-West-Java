@@ -256,38 +256,39 @@ public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY
         new Float:rDist = frandom(-5.0, 6.0);
         if(rDist > 0.0) {
             new Float:vX, Float:vY, Float:vZ,
-                Float:pX, Float:pY, Float:pZ;
+                Float:pX, Float:pY, Float:pZ,
+                Float:randOffset = frandom(-0.5, 0.5),
+                Float:size = 0.0;
             GetPlayerLastShotVectors(playerid, vX, vY, vZ, fX, fY, fZ);
-            
+
             vX = fX - vX; 
             vY = fY - vY; 
             vZ = fZ - vZ; 
 
-            new Float:d = VectorSize(vX, vY, vZ);
-            vX /= d;
-            vY /= d;
-            vZ /= d;
-            
+            size = VectorSize(vX, vY, vZ);
+            vX /= size;
+            vY /= size;
+            vZ /= size;
+
             vX *= rDist;
             vY *= rDist;
             vZ *= rDist;
-            
-            vX += fX + frandom(-0.5, 0.5);
-            vY += fY + frandom(-0.5, 0.5);
-            vZ += fZ + frandom(-0.5, 0.5);
-            
-            if(CA_RayCastLineNormal(fX, fY, fZ, vX, vY, vZ, pX, pY, pZ, pX, pY, pZ)) {
-                rDist = frandom(0.005, 0.020, 4);
-                pX *= rDist;
-                pY *= rDist;
-                pZ *= rDist;
-                
-                CA_RayCastLineAngle(fX, fY, fZ, vX, vY, vZ, fX, fY, fZ, vX, vY, vZ);
-                
-                new objectid = CreateDynamicObject(19836, fX + pX, fY + pY, fZ + pZ, vX, vY, vZ);
-                if(IsValidDynamicObject(objectid)) {
-                    SetDynamicObjectMaterial(objectid, 0, -1, "none", "none", 0xFFFF0000);
-                    
+
+            vX += fX + randOffset;
+            vY += fY + randOffset;
+            vZ += fZ + randOffset;
+
+            new Float:hitX, Float:hitY, Float:hitZ;
+            if(CA_RayCastLineNormal(fX, fY, fZ, vX, vY, vZ, pX, pY, pZ, hitX, hitY, hitZ)) {
+                randOffset = frandom(0.005, 0.020, 4);
+                pX *= randOffset;
+                pY *= randOffset;
+                pZ *= randOffset;
+
+                CA_RayCastLineAngle(fX, fY, fZ, vX, vY, vZ, hitX, hitY, hitZ, vX, vY, vZ);
+
+                new objectid = CreateDynamicObjectEx(19836, fX + pX, fY + pY, fZ + pZ, vX, vY, vZ, -1, 0xFFFF0000);
+                if(objectid) {
                     SetTimerEx("FadeBlood", 1500, false, "ii", objectid, 255);
                 }
             }
@@ -297,18 +298,23 @@ public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY
     return 1;
 }
 
-DCCMD:kick(DCC_User:user, const args)
-{
-    new id, giveplayer[MAX_PLAYER_NAME], string[64];
-    if(sscanf(args,"u[24]",id)) return SendDC(DISCORD_CHANNEL_ID, "```Usage: /kick [playerid]```");
-    else if(!IsPlayerConnected(id))  return SendDC(DISCORD_CHANNEL_ID, "**Player is not connected.**");
-    GetPlayerName(id, giveplayer, MAX_PLAYER_NAME);
-    SendDC(DISCORD_CHANNEL_ID, "```Player %s has been kicked.```", giveplayer);
-    format(string, sizeof(string), "%s has been kicked from the server.", giveplayer);
+DCCMD:kick(DCC_User:user, const args) {
+    new playerId, playerName[MAX_PLAYER_NAME], string[64];
+    if(sscanf(args, "u[24]", playerId)) {
+        return SendDC(DISCORD_CHANNEL_ID, "```Usage: /kick [playerid]```");
+    } else if(!IsPlayerConnected(playerId)) {
+        return SendDC(DISCORD_CHANNEL_ID, "**Player is not connected.**");
+    }
+    GetPlayerName(playerId, playerName, MAX_PLAYER_NAME);
+    SendDC(DISCORD_CHANNEL_ID, "```Player %s has been kicked.```", playerName);
+
+    format(string, sizeof(string), "%s has been kicked from the server.", playerName);
     SendClientMessageToAll(COLOR_RED, string);
-    SetTimerEx("kicktimer", 500, false, "i", id);
+    SetTimerEx("kickTimer", 500, false, "i", playerId);
+
     return 1;
 }
+
 //
 DCCMD:exit2(DCC_User user, const char[] args)
 {
