@@ -110,23 +110,24 @@ public RestartTimer()
 }
 
 forward DCC_OnMessageCreate(DCC_Message:message);
-
-public DCC_OnMessageCreate(DCC_Message:message)
+//
+public DCC_OnMessageCreate(DCC_Message message)
 {
-	new realMsg[100];
-    DCC_GetMessageContent(message, realMsg, 100);
-    new bool:IsBot;
-    new DCC_Channel:channel;
- 	DCC_GetMessageChannel(message, channel);
-    new DCC_User:author;
-	DCC_GetMessageAuthor(message, author);
-    DCC_IsUserBot(author, IsBot);
-    if(channel == g_Discord_Chat && !IsBot)
+    new content[MAX_MESSAGE_LENGTH];
+    DCC_GetMessageContent(message, content, MAX_MESSAGE_LENGTH);
+
+    new isBot;
+    DCC_IsUserBot(DCC_GetMessageAuthor(message), isBot);
+
+    if (DCC_GetMessageChannel(message) == g_Discord_Chat && !isBot)
     {
-        new user_name[32 + 1], str[152];
-       	DCC_GetUserName(author, user_name, 32);
-        format(str,sizeof(str), "{8a6cd1}[DISCORD] {aa1bb5}%s: {ffffff}%s",user_name, realMsg);
-        SendClientMessageToAll(-1, str);
+        new username[MAX_USERNAME_LENGTH];
+        DCC_GetUserName(DCC_GetMessageAuthor(message), username, MAX_USERNAME_LENGTH);
+
+        new message[MAX_MESSAGE_LENGTH + MAX_USERNAME_LENGTH + 20];
+        format(message, sizeof(message), "[DISCORD] %s: %s", username, content);
+
+        SendClientMessageToAll(-1, message);
     }
 
     return 1;
@@ -134,18 +135,20 @@ public DCC_OnMessageCreate(DCC_Message:message)
 
 public OnPlayerText(playerid, text[])
 {
-
     new name[MAX_PLAYER_NAME + 1];
-    GetPlayerName(playerid, name, sizeof name);
-    if(strfind("@everyone", text, true)!= -1 || strfind("@here", text, true)!= -1)
-    {return 0;}
-    else{
+    GetPlayerName(playerid, name, sizeof(name));
+
+    if (strfind("@everyone", text, true) != -1 || strfind("@here", text, true) != -1) {
+        return 0;
+    }
+
     new msg[128];
     format(msg, sizeof(msg), "**%s:** %s", name, text);
-    DCC_SendChannelMessage(g_Discord_Chat, msg);}
+    DCC_SendChannelMessage(g_Discord_Chat, msg);
+
     return 1;
 }
-
+//
 public OnPlayerConnect(playerid)
 {
    	new name[MAX_PLAYER_NAME + 1];
@@ -306,62 +309,77 @@ DCCMD:kick(DCC_User:user, const args)
     SetTimerEx("kicktimer", 500, false, "i", id);
     return 1;
 }
-
-DCCMD:exit2(DCC:user, const args)
+//
+DCCMD:exit2(DCC_User user, const char[] args)
 {
-    new tmp[100], playername[200], string[200];
-    if (exitstage != 0)
-        return SendDC(DISCORD_CHANNEL_ID, "```Error: The server is already restarting.```");
-    strmid(tmp, args, 6, strlen(args));
-    if (strlen(tmp) != 0) {
-        format(string, sizeof(string), "```The server has been restarted. Reason: %s```", tmp);
-        SendDC(DISCORD_CHANNEL_ID, string);
+    new reason[200];
+    if (exitstage != 0) {
+        SendDC(DISCORD_CHANNEL_ID, "```Error: The server is already restarting.```");
+        return 1;
     }
-    else {
+    if (sscanf(args, "%s", reason) == 1) {
+        SendDC(DISCORD_CHANNEL_ID, "```The server has been restarted. Reason: %s```", reason);
+    } else {
         SendDC(DISCORD_CHANNEL_ID, "```The server has been restarted.```");
     }
-    DCC_GetUserName(user, playername, MAX_PLAYER_NAME);
+    new playername[MAX_PLAYER_NAME];
+    DCC_GetUserName(user, playername, sizeof(playername));
     printf("[exit] %s has restarted the server.", playername);
     exitstage = 1;
     exittimer = SetTimer("RestartTimer", 10, 0);
     return 1;
 }
-DCCMD:freeze(DCC_User:user, const args)
+
+DCCMD:freeze(DCC_User user, const char[] args)
 {
-	new giveplayerid, giveplayer[MAX_PLAYER_NAME];
-	if (sscanf(args, "u", giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "```Usage: /freeze [playerid]```");
-	if (!IsPlayerConnected(giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "**Error: Inactive player id!**");
-	TogglePlayerControllable(giveplayerid, 0);
-	GetPlayerName(giveplayerid, giveplayer, MAX_PLAYER_NAME);
-	SendClientMessage(giveplayerid, COLOR_RED, "You have been frozen by an admin.");
-	SendDC(DISCORD_CHANNEL_ID, "``` Player %s has been frozen.```", giveplayer);
-	return 1;
+    new playerid;
+    if (sscanf(args, "u", playerid) != 1) {
+        return SendDC(DISCORD_CHANNEL_ID, "```Usage: /freeze [playerid]```");
+    }
+    if (!IsPlayerConnected(playerid)) {
+        return SendDC(DISCORD_CHANNEL_ID, "**Error: Inactive player id!**");
+    }
+    TogglePlayerControllable(playerid, 0);
+    new playername[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, playername, sizeof(playername));
+    SendClientMessage(playerid, COLOR_RED, "You have been frozen by an admin.");
+    SendDC(DISCORD_CHANNEL_ID, "``` Player %s has been frozen.```", playername);
+    return 1;
 }
- 
-DCCMD:unfreeze(DCC_User:user, const args)
+
+DCCMD:unfreeze(DCC_User user, const char[] args)
 {
-    new giveplayerid, giveplayer[MAX_PLAYER_NAME];
-	if (sscanf(args, "u", giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "```Usage: /unfreeze [playerid]```");
-	if (!IsPlayerConnected(giveplayerid)) return SendDC(DISCORD_CHANNEL_ID, "**Error: Inactive player id!**");
-    TogglePlayerControllable(giveplayerid, 1);
-    GetPlayerName(giveplayerid, giveplayer, MAX_PLAYER_NAME);
-	SendClientMessage(giveplayerid, COLOR_RED, "You have been unfrozen by an admin.");
-	SendDC(DISCORD_CHANNEL_ID, "``` Player %s has been unfrozen.```", giveplayer);
-	return 1;
+    new playerid;
+    if (sscanf(args, "u", playerid) != 1) {
+        return SendDC(DISCORD_CHANNEL_ID, "```Usage: /unfreeze [playerid]```");
+    }
+    if (!IsPlayerConnected(playerid)) {
+        return SendDC(DISCORD_CHANNEL_ID, "**Error: Inactive player id!**");
+    }
+    TogglePlayerControllable(playerid, 1);
+    new playername[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, playername, sizeof(playername));
+    SendClientMessage(playerid, COLOR_RED, "You have been unfrozen by an admin.");
+    SendDC(DISCORD_CHANNEL_ID, "``` Player %s has been unfrozen.```", playername);
+    return 1;
 }
-DCCMD:players(DCC_User:user, const args)
+
+DCCMD:players(DCC_User user, const char[] args)
 {
     new count = 0;
-	new name[24], IP[50];
-	SendDC(DISCORD_CHANNEL_ID, "**__Online Players__**");
-	for(new i=0; i < MAX_PLAYERS; i++) {
-	if(!IsPlayerConnected(i)) continue;
-	GetPlayerName(i, name, MAX_PLAYER_NAME);
-    GetPlayerIp(i, IP, sizeof(IP));
-	{
-	   SendDC(DISCORD_CHANNEL_ID, "```%s(%d) %s %i```", name, i, IP, GetPlayerScore(i));
-	   count++; }
-	}
-	if (count == 0) return SendDC(DISCORD_CHANNEL_ID, "There are no players online.");
-	return 1;
+    SendDC(DISCORD_CHANNEL_ID, "**__Online Players__**");
+    for (new i = 0; i < MAX_PLAYERS; i++) {
+        if (!IsPlayerConnected(i)) {
+            continue;
+        }
+        new name[MAX_PLAYER_NAME], ip[50];
+        GetPlayerName(i, name, sizeof(name));
+        GetPlayerIp(i, ip, sizeof(ip));
+        SendDC(DISCORD_CHANNEL_ID, "```%s(%d) %s %i```", name, i, ip, GetPlayerScore(i));
+        count++;
+    }
+    if (count == 0) {
+        SendDC(DISCORD_CHANNEL_ID, "There are no players online.");
+    }
+    return 1;
 }
