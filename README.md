@@ -6,6 +6,20 @@
 
 Ini adalah repositori untuk Central West Java Server SA-MP. Repositori ini digunakan untuk pengembangan dan pemeliharaan server samp untuk Central West Java.
 
+## Beberapa catatan:
+
+- Skrip ini berbasis script Diverse Gaming yang dibuat oleh beckzy.
+
+- Untuk menjadikan dirimu level 7 (admin utama), tambahkan tanpa tanda kutip baris-baris "admin_lev=7" dan "admin_id=1" ke file akunmu (jangan lupa untuk menambahkan baris baru), tambahkan ke file datafiles/a/adminids.ini "admin1=NamaAndaDiSini", tambahkan ke file datafiles/a/admins.ini "NamaAndaDiSini=7", dan akhirnya tambahkan "admins=1" ke file datafiles/t/totalstat.ini.
+
+- Admin ID 1 (yang baru saja kamu tambahkan dari catatan di atas) memiliki kontrol atas semua admin, bahkan admin level 7 lainnya.
+
+- strcmp digunakan, bukan command processor.
+
+- Skrip ini menggunakan DINI.
+
+- Skrip ini juga menggunakan plugin sscanf dari Y_Less, plugin streamer dari Incognito, plugin MRandom dari cyber_punk, plugin Pawn.RakNet dari YourShadow, versi YSF dari IllidanS4, versi MapAndreas dari philip1337, dan versi YSF dari Slice.
+
 ## Penggunaan
 
 Untuk menggunakan server samp ini, Anda perlu mengikuti langkah-langkah berikut:
