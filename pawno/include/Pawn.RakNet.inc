@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2020 urShadow
+ * Copyright (c) 2016-2023 katursis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,12 @@
 #if !defined PAWNRAKNET_INC_
     #define PAWNRAKNET_INC_
 
-    #define PAWNRAKNET_INCLUDE_VERSION 141
+    #if !defined PACK_PLUGIN_VERSION
+        #define PACK_PLUGIN_VERSION(%0,%1,%2) (((%0) << 16) | ((%1) << 8) | (%2))
+    #endif
+
+    #define PAWNRAKNET_VERSION PACK_PLUGIN_VERSION(1, 6, 0)
+    #define PAWNRAKNET_INCLUDE_VERSION PAWNRAKNET_VERSION // backward compatibility
 
     #define PR_MAX_HANDLERS 256
 
@@ -33,69 +38,78 @@
     {
         PR_INCOMING_PACKET,
         PR_INCOMING_RPC,
-        PR_OUTCOMING_PACKET,
-        PR_OUTCOMING_RPC,
+        PR_OUTGOING_PACKET,
+        PR_OUTGOING_RPC,
         PR_INCOMING_RAW_PACKET,
+        PR_INCOMING_INTERNAL_PACKET,
+        PR_OUTGOING_INTERNAL_PACKET,
+        PR_INCOMING_CUSTOM_RPC,
 
-        PR_NUMBER_OF_EVENT_TYPES
+        PR_NUMBER_OF_EVENT_TYPES,
+
+        // backward compatibility
+        PR_OUTCOMING_PACKET = PR_OUTGOING_PACKET,
+        PR_OUTCOMING_RPC = PR_OUTGOING_RPC,
     };
 
     enum PR_ValueType
     {
-        PR_INT8,
-        PR_INT16,
-        PR_INT32,
-        PR_UINT8,
-        PR_UINT16,
-        PR_UINT32,
-        PR_FLOAT,
-        PR_BOOL,
-        PR_STRING,
+        PR_INT8, // char
+        PR_INT16, // short
+        PR_INT32, // int
+        PR_UINT8, // unsigned char
+        PR_UINT16, // unsigned short
+        PR_UINT32, // unsigned int
+        PR_FLOAT, // float
+        PR_BOOL, // bool
+        PR_STRING, // char[]
 
-        // compressed
+        // compressed types. For non-floating point, this is lossless, but only has benefit if you use less than half the range of the type
         PR_CINT8,
         PR_CINT16,
         PR_CINT32,
         PR_CUINT8,
         PR_CUINT16,
         PR_CUINT32,
-        PR_CFLOAT,
+        PR_CFLOAT, // read/write a float using 2 bytes instead of 4. Lossy. The range must be between -1 and +1
         PR_CBOOL,
         PR_CSTRING,
 
         PR_BITS,
-        PR_FLOAT3,
-        PR_FLOAT4,
-        PR_VECTOR,
-        PR_NORM_QUAT,
+        PR_FLOAT3, // float * 3
+        PR_FLOAT4, // float * 4
+        PR_VECTOR, // read/write a float vector, using 10 bytes instead of 12. Loses accuracy to about 3/10ths and only saves 2 bytes, so only use if accuracy is not important
+        PR_NORM_QUAT, // read/write a normalized float quaternion in 6 bytes + 4 bits instead of 16 bytes. Slightly lossy
 
-        PR_STRING8,
-        PR_STRING32,
+        PR_STRING8, // unsigned char + char[]
+        PR_STRING32, // unsigned int + char[]
 
-        // shift the write or read pointer
-        PR_IGNORE_BITS,
+        PR_IGNORE_BITS, // shift read/write pointer
     };
 
     enum PR_PacketPriority
     {
-        PR_SYSTEM_PRIORITY,
-        PR_HIGH_PRIORITY,
-        PR_MEDIUM_PRIORITY,
-        PR_LOW_PRIORITY
+        PR_SYSTEM_PRIORITY, // used by RakNet to send above-high priority messages
+        PR_HIGH_PRIORITY, // high priority messages are send before medium priority messages
+        PR_MEDIUM_PRIORITY, // medium priority messages are send before low priority messages
+        PR_LOW_PRIORITY, // low priority messages are only sent when no other messages are waiting
     };
 
     enum PR_PacketReliability
     {
-        PR_UNRELIABLE = 6,
-        PR_UNRELIABLE_SEQUENCED,
-        PR_RELIABLE,
-        PR_RELIABLE_ORDERED,
-        PR_RELIABLE_SEQUENCED
+        PR_UNRELIABLE = 6, // same as regular UDP, except that it will also discard duplicate datagrams. RakNet adds (6 to 17) + 21 bits of overhead, 16 of which is used to detect duplicate packets and 6 to 17 of which is used for message length
+        PR_UNRELIABLE_SEQUENCED, // regular UDP with a sequence counter. Out of order messages will be discarded. This adds an additional 13 bits on top what is used for UNRELIABLE
+        PR_RELIABLE, // the message is sent reliably, but not necessarily in any order. Same overhead as UNRELIABLE
+        PR_RELIABLE_ORDERED, // this message is reliable and will arrive in the order you sent it. Messages will be delayed while waiting for out of order messages. Same overhead as UNRELIABLE_SEQUENCED
+        PR_RELIABLE_SEQUENCED, // this message is reliable and will arrive in the sequence you sent it. Out or order messages will be dropped. Same overhead as UNRELIABLE_SEQUENCED
     };
 
     #if !defined __cplusplus
-        public _pawnraknet_version = PAWNRAKNET_INCLUDE_VERSION;
+        public _pawnraknet_version = PAWNRAKNET_VERSION;
         #pragma unused _pawnraknet_version
+
+        public bool:_pawnraknet_is_gamemode = !defined FILTERSCRIPT;
+        #pragma unused _pawnraknet_is_gamemode
 
         #define PR_BITS_TO_BYTES(%0) (((%0)+7)>>3)
         #define PR_BYTES_TO_BITS(%0) ((%0)<<3)
@@ -108,15 +122,25 @@
 
         #define IPacket:%0(%1) PR_Handler<PR_INCOMING_PACKET,ip>:%0(%1)
         #define IRPC:%0(%1) PR_Handler<PR_INCOMING_RPC,ir>:%0(%1)
-        #define OPacket:%0(%1) PR_Handler<PR_OUTCOMING_PACKET,op>:%0(%1)
-        #define ORPC:%0(%1) PR_Handler<PR_OUTCOMING_RPC,or>:%0(%1)
+        #define OPacket:%0(%1) PR_Handler<PR_OUTGOING_PACKET,op>:%0(%1)
+        #define ORPC:%0(%1) PR_Handler<PR_OUTGOING_RPC,or>:%0(%1)
         #define IRawPacket:%0(%1) PR_Handler<PR_INCOMING_RAW_PACKET,irp>:%0(%1)
+        #define IInternalPacket:%0(%1) PR_Handler<PR_INCOMING_INTERNAL_PACKET,iip>:%0(%1)
+        #define OInternalPacket:%0(%1) PR_Handler<PR_OUTGOING_INTERNAL_PACKET,oip>:%0(%1)
+        #define ICustomRPC:%0(%1) PR_Handler<PR_INCOMING_CUSTOM_RPC,icr>:%0(%1)
 
         #define IncomingPacket IPacket
         #define IncomingRPC IRPC
-        #define OutcomingPacket OPacket
-        #define OutcomingRPC ORPC
+        #define OutgoingPacket OPacket
+        #define OutgoingRPC ORPC
         #define IncomingRawPacket IRawPacket
+        #define IncomingInternalPacket IInternalPacket
+        #define OutgoingInternalPacket OInternalPacket
+        #define IncomingCustomRPC ICustomRPC
+
+        // backward compatibility
+        #define OutcomingPacket OutgoingPacket
+        #define OutcomingRPC OutgoingRPC
 
         #define PR_MAX_WEAPON_SLOTS 13
 
@@ -136,7 +160,7 @@
             Float:PR_surfingOffsets[3],
             PR_surfingVehicleId,
             PR_animationId,
-            PR_animationFlags
+            PR_animationFlags,
         };
 
         enum PR_InCarSync
@@ -156,7 +180,7 @@
             PR_sirenState,
             PR_landingGearState,
             PR_trailerId,
-            Float:PR_trainSpeed
+            Float:PR_trainSpeed,
         };
 
         enum PR_TrailerSync
@@ -165,7 +189,7 @@
             Float:PR_position[3],
             Float:PR_quaternion[4],
             Float:PR_velocity[3],
-            Float:PR_angularVelocity[3]
+            Float:PR_angularVelocity[3],
         };
 
         enum PR_PassengerSync
@@ -180,7 +204,7 @@
             PR_lrKey,
             PR_udKey,
             PR_keys,
-            Float:PR_position[3]
+            Float:PR_position[3],
         };
 
         enum PR_UnoccupiedSync
@@ -192,7 +216,7 @@
             Float:PR_position[3],
             Float:PR_velocity[3],
             Float:PR_angularVelocity[3],
-            Float:PR_vehicleHealth
+            Float:PR_vehicleHealth,
         };
 
         enum PR_AimSync
@@ -203,7 +227,7 @@
             Float:PR_aimZ,
             PR_camZoom,
             PR_weaponState,
-            PR_aspectRatio
+            PR_aspectRatio,
         };
 
         enum PR_BulletSync
@@ -213,7 +237,7 @@
             Float:PR_origin[3],
             Float:PR_hitPos[3],
             Float:PR_offsets[3],
-            PR_weaponId
+            PR_weaponId,
         };
 
         enum PR_SpectatingSync
@@ -221,7 +245,18 @@
             PR_lrKey,
             PR_udKey,
             PR_keys,
-            Float:PR_position[3]
+            Float:PR_position[3],
+        };
+
+        enum PR_MarkersSync
+        {
+            PR_numberOfPlayers,
+            PR_playerIsActive[MAX_PLAYERS],
+            PR_playerPositionX[MAX_PLAYERS],
+            PR_playerPositionY[MAX_PLAYERS],
+            PR_playerPositionZ[MAX_PLAYERS],
+
+            PR_playerIsParticipant[MAX_PLAYERS], // Pawn.RakNet internal helping field
         };
 
         enum PR_WeaponsUpdate
@@ -231,27 +266,29 @@
             PR_slotWeaponId[PR_MAX_WEAPON_SLOTS],
             PR_slotWeaponAmmo[PR_MAX_WEAPON_SLOTS],
 
-            PR_slotUpdated[PR_MAX_WEAPON_SLOTS] // internal helping field
+            PR_slotUpdated[PR_MAX_WEAPON_SLOTS], // Pawn.RakNet internal helping field
         };
 
         enum PR_StatsUpdate
         {
             PR_money,
-            PR_drunkLevel
+            PR_drunkLevel,
         };
 
         enum PR_RconCommand
         {
-            PR_command[256]
+            PR_command[256],
         };
 
-        native PR_SendPacket(BitStream:bs, playerid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED);
-        native PR_SendRPC(BitStream:bs, playerid, rpcid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED);
+        native PR_Init(); // internal
+
+        native PR_SendPacket(BitStream:bs, playerid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0);
+        native PR_SendRPC(BitStream:bs, playerid, rpcid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0);
 
         #pragma deprecated Use PR_SendPacket instead
-        native BS_Send(BitStream:bs, playerid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED) = PR_SendPacket;
+        native BS_Send(BitStream:bs, playerid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0) = PR_SendPacket;
         #pragma deprecated Use PR_SendRPC instead
-        native BS_RPC(BitStream:bs, playerid, rpcid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED) = PR_SendRPC;
+        native BS_RPC(BitStream:bs, playerid, rpcid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0) = PR_SendRPC;
 
         native PR_EmulateIncomingPacket(BitStream:bs, playerid);
         native PR_EmulateIncomingRPC(BitStream:bs, playerid, rpcid);
@@ -283,8 +320,7 @@
         native BS_WriteValue(BitStream:bs, {PR_ValueType, Float, _}:...);
         native BS_ReadValue(BitStream:bs, {PR_ValueType, Float, _}:...);
 
-        native PR_RegHandler(id, const publicname[], PR_EventType:type);
-        native PR_Init(bool:is_gamemode);
+        native PR_RegHandler(eventid, const publicname[], PR_EventType:type);
 
         #define BS_ReadInt8(%0,%1) BS_ReadValue(%0,PR_INT8,%1)
         #define BS_ReadInt16(%0,%1) BS_ReadValue(%0,PR_INT16,%1)
@@ -347,11 +383,34 @@
         #define PR_EXPAND_ARR3(%0) %0[0],%0[1],%0[2]
         #define PR_EXPAND_ARR4(%0) %0[0],%0[1],%0[2],%0[3]
 
-        stock BS_PackHealthArmour(health, armour, &healthArmour) {
+        stock BS_PackAspectRatio(Float:value)
+        {
+            return floatround((value - 1.0) * 255.0);
+        }
+
+        stock Float:BS_UnpackAspectRatio(value)
+        {
+            return float(value) / 255.0 + 1.0;
+        }
+
+        stock BS_PackCameraZoom(Float:value)
+        {
+            return floatround(((value - 35.0) / 35.0) * 63.0);
+        }
+
+        stock Float:BS_UnpackCameraZoom(value)
+        {
+            return (float(value) / 63.0) * 35.0 + 35.0;
+        }
+
+        stock BS_PackHealthArmour(health, armour, &healthArmour)
+        {
             if (health > 0 && health < 100) {
                 healthArmour = (health / 7) << 4;
             } else if (health >= 100) {
-                healthArmour = 0xF << 4;
+                healthArmour = 0xF0; // 0xF << 4
+            } else {
+                healthArmour = 0;
             }
 
             if (armour > 0 && armour < 100) {
@@ -361,32 +420,26 @@
             }
         }
 
-        stock BS_UnpackHealthArmour(healthArmour, &health, &armour) {
-            new armourTemp, healthTemp;
-
-            armourTemp = (healthArmour & 0x0F);
-            healthTemp = (healthArmour >> 4);
-
-            if (armourTemp == 0xF) {
-                armour = 100;
-            } else if (armourTemp == 0) {
-                armour = 0;
+        stock BS_UnpackHealthArmour(healthArmour, &health, &armour)
+        {
+            health = healthArmour >> 4;
+            if (health == 0xF) {
+                health = 100;
             } else {
-                armour = armourTemp * 7;
+                health *= 7;
             }
 
-            if (healthTemp == 0xF) {
-                health = 100;
-            } else if (healthTemp == 0) {
-                health = 0;
+            armour = healthArmour & 0xF;
+            if (armour == 0xF) {
+                armour = 100;
             } else {
-                health = healthTemp * 7;
+                armour *= 7;
             }
         }
 
-        stock BS_ReadOnFootSync(BitStream:bs, data[PR_OnFootSync], outcoming = false)
+        stock BS_ReadOnFootSync(BitStream:bs, data[PR_OnFootSync], outgoing = false)
         {
-            if (outcoming) {
+            if (outgoing) {
                 new hasLeftRight, hasUpDown, hasSurfInfo, hasAnimation, healthArmour;
 
                 BS_ReadValue(bs, PR_BOOL, hasLeftRight);
@@ -463,9 +516,9 @@
             }
         }
 
-        stock BS_ReadInCarSync(BitStream:bs, data[PR_InCarSync], outcoming = false)
+        stock BS_ReadInCarSync(BitStream:bs, data[PR_InCarSync], outgoing = false)
         {
-            if (outcoming) {
+            if (outgoing) {
                 new vehicleHealth, healthArmour;
 
                 BS_ReadValue(
@@ -611,9 +664,47 @@
             );
         }
 
+        stock BS_ReadMarkersSync(BitStream:bs, data[PR_MarkersSync])
+        {
+            new numberOfPlayers, playerId, isActive;
+
+            BS_ReadInt32(bs, numberOfPlayers);
+
+            if (numberOfPlayers < 0 || numberOfPlayers > MAX_PLAYERS) {
+                return;
+            }
+
+            data[PR_numberOfPlayers] = numberOfPlayers;
+
+            for (new i; i < numberOfPlayers; i++) {
+                playerId = isActive = 0;
+
+                BS_ReadUint16(bs, playerId);
+
+                if (playerId >= MAX_PLAYERS) {
+                    return;
+                }
+
+                data[PR_playerIsParticipant][playerId] = true;
+
+                BS_ReadCompressedBool(bs, isActive);
+
+                if (isActive) {
+                    data[PR_playerIsActive][playerId] = true;
+
+                    BS_ReadValue(
+                        bs,
+                        PR_INT16, data[PR_playerPositionX][playerId],
+                        PR_INT16, data[PR_playerPositionY][playerId],
+                        PR_INT16, data[PR_playerPositionZ][playerId]
+                    );
+                }
+            }
+        }
+
         stock BS_ReadWeaponsUpdate(BitStream:bs, data[PR_WeaponsUpdate])
         {
-            new numberOfBytes, numberOfSlots;
+            new numberOfBytes, numberOfSlots, slotId, weaponId, ammo;
 
             BS_GetNumberOfBytesUsed(bs, numberOfBytes);
 
@@ -628,7 +719,7 @@
             );
 
             while (numberOfSlots--) {
-                new slotId, weaponId, ammo;
+                slotId = weaponId = ammo = 0;
 
                 BS_ReadValue(
                     bs,
@@ -662,9 +753,9 @@
             );
         }
 
-        stock BS_WriteOnFootSync(BitStream:bs, data[PR_OnFootSync], outcoming = false)
+        stock BS_WriteOnFootSync(BitStream:bs, data[PR_OnFootSync], outgoing = false)
         {
-            if (outcoming) {
+            if (outgoing) {
                 new healthArmour;
 
                 if (data[PR_lrKey]) {
@@ -743,9 +834,9 @@
             }
         }
 
-        stock BS_WriteInCarSync(BitStream:bs, data[PR_InCarSync], outcoming = false)
+        stock BS_WriteInCarSync(BitStream:bs, data[PR_InCarSync], outgoing = false)
         {
-            if (outcoming) {
+            if (outgoing) {
                 new healthArmour;
 
                 BS_PackHealthArmour(data[PR_playerHealth], data[PR_armour], healthArmour);
@@ -889,6 +980,32 @@
             );
         }
 
+        stock BS_WriteMarkersSync(BitStream:bs, data[PR_MarkersSync])
+        {
+            BS_WriteInt32(bs, data[PR_numberOfPlayers]);
+
+            for (new i; i < MAX_PLAYERS; i++) {
+                if (!data[PR_playerIsParticipant][i]) {
+                    continue;
+                }
+
+                BS_WriteValue(
+                    bs,
+                    PR_UINT16, i,
+                    PR_CBOOL, data[PR_playerIsActive][i]
+                );
+
+                if (data[PR_playerIsActive][i]) {
+                    BS_WriteValue(
+                        bs,
+                        PR_INT16, data[PR_playerPositionX][i],
+                        PR_INT16, data[PR_playerPositionY][i],
+                        PR_INT16, data[PR_playerPositionZ][i]
+                    );
+                }
+            }
+        }
+
         stock BS_WriteWeaponsUpdate(BitStream:bs, data[PR_WeaponsUpdate])
         {
             BS_WriteValue(
@@ -897,7 +1014,7 @@
                 PR_UINT16, data[PR_targetActorId]
             );
 
-            for (new slotId; slotId < PR_MAX_WEAPON_SLOTS; ++slotId) {
+            for (new slotId; slotId < PR_MAX_WEAPON_SLOTS; slotId++) {
                 if (!data[PR_slotUpdated][slotId]) {
                     continue;
                 }
@@ -928,76 +1045,83 @@
             );
         }
 
-        stock PR_SendPacketToPlayerStream(BitStream:bs, playerid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED)
+        stock PR_SendPacketToPlayerStream(BitStream:bs, playerid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0)
         {
             #if defined foreach
             foreach (new i : Player) {
             #else
-            for (new i = GetPlayerPoolSize(); i >= 0; --i) {
+            for (new i = GetPlayerPoolSize(); i >= 0; i--) {
             #endif
                 if (!IsPlayerStreamedIn(i, playerid)) {
                     continue;
                 }
 
-                PR_SendPacket(bs, i, priority, reliability);
+                PR_SendPacket(bs, i, priority, reliability, orderingchannel);
             }
         }
 
-        stock PR_SendRPCToPlayerStream(BitStream:bs, playerid, rpcid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED)
+        stock PR_SendRPCToPlayerStream(BitStream:bs, playerid, rpcid, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0)
         {
             #if defined foreach
             foreach (new i : Player) {
             #else
-            for (new i = GetPlayerPoolSize(); i >= 0; --i) {
+            for (new i = GetPlayerPoolSize(); i >= 0; i--) {
             #endif
                 if (!IsPlayerStreamedIn(i, playerid)) {
                     continue;
                 }
 
-                PR_SendRPC(bs, i, rpcid, priority, reliability);
+                PR_SendRPC(bs, i, rpcid, priority, reliability, orderingchannel);
             }
         }
 
-        stock PR_SendPacketToVehicleStream(BitStream:bs, vehicleid, excludedplayerid = INVALID_PLAYER_ID, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED)
+        stock PR_SendPacketToVehicleStream(BitStream:bs, vehicleid, excludedplayerid = INVALID_PLAYER_ID, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0)
         {
             #if defined foreach
             foreach (new i : Player) {
             #else
-            for (new i = GetPlayerPoolSize(); i >= 0; --i) {
+            for (new i = GetPlayerPoolSize(); i >= 0; i--) {
             #endif
                 if (i == excludedplayerid || !IsVehicleStreamedIn(vehicleid, i)) {
                     continue;
                 }
 
-                PR_SendPacket(bs, i, priority, reliability);
+                PR_SendPacket(bs, i, priority, reliability, orderingchannel);
             }
         }
 
-        stock PR_SendRPCToVehicleStream(BitStream:bs, vehicleid, rpcid, excludedplayerid = INVALID_PLAYER_ID, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED)
+        stock PR_SendRPCToVehicleStream(BitStream:bs, vehicleid, rpcid, excludedplayerid = INVALID_PLAYER_ID, PR_PacketPriority:priority = PR_HIGH_PRIORITY, PR_PacketReliability:reliability = PR_RELIABLE_ORDERED, orderingchannel = 0)
         {
             #if defined foreach
             foreach (new i : Player) {
             #else
-            for (new i = GetPlayerPoolSize(); i >= 0; --i) {
+            for (new i = GetPlayerPoolSize(); i >= 0; i--) {
             #endif
                 if (i == excludedplayerid || !IsVehicleStreamedIn(vehicleid, i)) {
                     continue;
                 }
 
-                PR_SendRPC(bs, i, rpcid, priority, reliability);
+                PR_SendRPC(bs, i, rpcid, priority, reliability, orderingchannel);
             }
         }
 
         forward OnIncomingPacket(playerid, packetid, BitStream:bs);
         forward OnIncomingRPC(playerid, rpcid, BitStream:bs);
-        forward OnOutcomingPacket(playerid, packetid, BitStream:bs);
-        forward OnOutcomingRPC(playerid, rpcid, BitStream:bs);
+        forward OnOutgoingPacket(playerid, packetid, BitStream:bs);
+        forward OnOutgoingRPC(playerid, rpcid, BitStream:bs);
         forward OnIncomingRawPacket(playerid, packetid, BitStream:bs);
+        forward OnIncomingInternalPacket(playerid, packetid, BitStream:bs);
+        forward OnOutgoingInternalPacket(playerid, packetid, BitStream:bs);
+
+        #pragma deprecated Use OnOutgoingPacket instead
+        forward OnOutcomingPacket(playerid, packetid, BitStream:bs);
+        #pragma deprecated Use OnOutgoingRPC instead
+        forward OnOutcomingRPC(playerid, rpcid, BitStream:bs);
 
         #if defined FILTERSCRIPT
             public OnFilterScriptInit()
             {
-                PR_Init(false);
+                PR_Init();
 
                 #if defined PawnRakNet_OnFilterScriptInit
                     PawnRakNet_OnFilterScriptInit();
@@ -1020,7 +1144,7 @@
         #else
             public OnGameModeInit()
             {
-                PR_Init(true);
+                PR_Init();
 
                 #if defined PawnRakNet_OnGameModeInit
                     PawnRakNet_OnGameModeInit();
