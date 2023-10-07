@@ -2,48 +2,34 @@
 <img src="https://user-images.githubusercontent.com/26300406/161512565-3c3969b9-256a-4907-a6c2-555bd56a31f4.png">
 </p>
 
-# Central West Java Server SA-MP
+# Central West Java
 
-Ini adalah repositori untuk Central West Java Server SA-MP. Repositori ini digunakan untuk pengembangan dan pemeliharaan server samp untuk Central West Java.
+Central West Java is a SAMP Script based on Beckzy Freeroam/Roleplay script. SAMP stands for San Andreas Multiplayer, a multiplayer mod for Grand Theft Auto: San Andreas. This script allows players to explore, roleplay, and have fun in a virtual world.
 
-## Beberapa catatan:
+## Features
 
-- Skrip ini berbasis script Diverse Gaming yang dibuat oleh beckzy.
+Some of the features of this script are:
 
-- Untuk menjadikan dirimu level 7 (admin utama), tambahkan tanpa tanda kutip baris-baris "admin_lev=7" dan "admin_id=1" ke file akunmu (jangan lupa untuk menambahkan baris baru), tambahkan ke file datafiles/a/adminids.ini "admin1=NamaAndaDiSini", tambahkan ke file datafiles/a/admins.ini "NamaAndaDiSini=7", dan akhirnya tambahkan "admins=1" ke file datafiles/t/totalstat.ini.
+- Freeroam mode: Players can roam around the map, drive vehicles, buy weapons, and interact with other players.
+- Roleplay mode: Players can choose from various jobs, such as taxi driver, pilot, cop, robber, etc. and earn money and reputation.
+- Events: Players can participate in various events, such as races, deathmatches, capture the vehicle, sumo, etc. and win prizes and fame.
+- VIP system: Players can buy VIP status and get access to exclusive features, such as custom vehicles, skins, commands, etc.
+- Admin system: Admins can manage the server and players, such as banning, kicking, muting, teleporting, etc.
+- And much more!
 
-- Admin ID 1 (yang baru saja kamu tambahkan dari catatan di atas) memiliki kontrol atas semua admin, bahkan admin level 7 lainnya.
+## Installation
 
-- strcmp digunakan, bukan command processor.
+To install this script, you need to have a SAMP server running on your machine. You can download the SAMP server package from [here](^1^). Then, follow these steps:
 
-- Skrip ini menggunakan DINI.
+1. Download the latest version of this script from [here](^2^) and extract it to your server folder.
+2. Download the MapAndreas plugin from [here](^3^) and copy it to your plugins folder.
+3. Edit the server.cfg file and add MapAndreas to the plugins line.
+4. Run the server and enjoy!
 
-- Skrip ini juga menggunakan plugin sscanf dari Y_Less, plugin streamer dari Incognito, plugin MRandom dari cyber_punk, plugin Pawn.RakNet dari YourShadow, versi YSF dari IllidanS4, versi MapAndreas dari philip1337, dan versi YSF dari Slice.
+## Credits
 
-## Penggunaan
+I would like to thank the following people for their contributions to this script:
 
-Untuk menggunakan server samp ini, Anda perlu mengikuti langkah-langkah berikut:
-
-1. Clone repositori ini ke dalam direktori lokal Anda.
-2. Pastikan Anda memiliki server samp yang terinstal di komputer Anda.
-3. Buka file `server.cfg` dan sesuaikan pengaturan sesuai dengan preferensi Anda.
-4. Jalankan server samp menggunakan file `samp-server.exe`.
-
-## Kontribusi
-
-Kami selalu terbuka untuk kontribusi dari pengguna lain. Jika Anda ingin berkontribusi pada repositori ini, silakan ikuti langkah-langkah berikut:
-
-1. Fork repositori ini ke dalam akun Github Anda.
-2. Buat branch baru untuk fitur atau perbaikan yang ingin Anda tambahkan.
-3. Lakukan perubahan atau penambahan yang diperlukan.
-4. Buat pull request ke repositori utama.
-
-## Lisensi
-
-Repositori ini dilisensikan di bawah lisensi [MIT](https://opensource.org/licenses/MIT). Silakan merujuk ke file `LICENSE` untuk informasi lebih lanjut tentang lisensi ini.
-
-## Disclaimer
-
-It is forbidden to change the ownership of this script and it is forbidden to change the ownership of the name Central West Java. The name Central West Java is still held by Eren and Alsheira.
-
----
+- beckzy: The original author of the Freeroam/Roleplay script. You can check his release topic [here](^4^).
+- All former staff and members of CWJ: For their support and feedback during the development of this script.
+- All other scripters and modders who helped me with this script.
