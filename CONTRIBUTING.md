@@ -112,4 +112,4 @@ If you accept the invitation, you will be expected to follow the [code of conduc
 
 ## Thank you
 
-Thank you for your interest and contribution to this project. I appreciate your time and effort. I hope you enjoy playing and developing this script as much as I do. If you have any questions or concerns, please feel free to contact me at wahitftry@gmail.com. Happy coding!
+Thank you for your interest and contribution to this project. I appreciate your time and effort. I hope you enjoy playing and developing this script as much as I do. If you have any questions or concerns, please feel free to contact me at wahitfitriyanto@gmail.com. Happy coding!
