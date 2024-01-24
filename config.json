@@ -78,14 +78,14 @@
     "pawn": {
         "legacy_plugins": [],
         "main_scripts": [
-            "test 1"
+            "bb_freeroam"
         ],
         "side_scripts": []
     },
     "rcon": {
         "allow_teleport": false,
         "enable": false,
-        "password": "changeme"
+        "password": "123456"
     },
     "sleep": 5.0,
     "use_dyn_ticks": true,
