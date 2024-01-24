@@ -18,9 +18,9 @@ jobs:
       run: |
         cd pawno
         scripts=$(find ../filterscripts -name "*.pwn")
-        for script in $scripts; do
+        for script in $scripts; do (
           ./pawncc.exe "$script" --% -Dfilterscripts -;+ -(+ -d3
-        done
+        ); done
 
     - name: Compile CWJ Gamemode
       run: |
