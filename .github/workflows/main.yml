@@ -17,7 +17,8 @@ jobs:
     - name: Compile CWJ Filterscript
       run: |
         cd pawno
-        for (script in ../filterscripts/*.pwn); do
+        scripts=$(find ../filterscripts -name "*.pwn")
+        for script in $scripts; do
           ./pawncc.exe "$script" --% -Dfilterscripts -;+ -(+ -d3
         done
 
