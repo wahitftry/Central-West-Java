@@ -14,14 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Compile CWJ Filterscript
+    - name: Compile Filterscripts
       run: |
         cd pawno
-        scripts=$(find ../filterscripts -name "*.pwn")
-        for script in $scripts; do (
-          ./pawncc.exe "$script" --% -Dfilterscripts -;+ -(+ -d3
-        ); done
-
+        Get-ChildItem -Filter "../filterscripts/*.pwn" | ForEach-Object {
+          ./pawncc.exe $_ --% -Dfilterscripts -;+ -(+ -d3
+        }
+        
     - name: Compile CWJ Gamemode
       run: |
         cd pawno
