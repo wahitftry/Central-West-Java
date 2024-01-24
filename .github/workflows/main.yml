@@ -17,7 +17,7 @@ jobs:
     - name: Compile SAMP Gamemode
       run: |
         cd pawno
-        ./pawncc.exe ../gamemodes/bb_freeroam.pwn
+        ./pawncc.exe -r -w 203 ../gamemodes/bb_freeroam.pwn
 
     - name: Commit and push if changed
       run: |
