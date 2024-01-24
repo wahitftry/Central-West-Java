@@ -14,7 +14,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Compile SAMP Gamemode
+    - name: Compile CWJ Filterscript
+      run: |
+        cd pawno
+        for script in ../filterscripts/*.pwn; do
+          ./pawncc.exe "$script" --% -Dfilterscripts -;+ -(+ -d3
+        done
+
+    - name: Compile CWJ Gamemode
       run: |
         cd pawno
         ./pawncc.exe ../gamemodes/bb_freeroam.pwn --% -Dgamemodes -;+ -(+ -d3
