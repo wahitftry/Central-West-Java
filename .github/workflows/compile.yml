@@ -2,10 +2,10 @@ name: Compile CWJ Gamemode and Filterscripts
 
 on:
   workflow_dispatch:
-  push:
-    branches: [cwj-v2]
-  pull_request:
-    branches: [cwj-v2]
+  # push:
+  #   branches: [cwj-v2]
+  # pull_request:
+  #   branches: [cwj-v2]
 
 jobs:
   build:
